@@ -3,6 +3,7 @@ const express = require('express');
 const db = require('./data/db');
 
 const server = express();
+server.use(express.json());
 
 server.get('/api/users', (req, res)=>{
     db.find()
@@ -14,7 +15,7 @@ server.get('/api/users', (req, res)=>{
     });
 });
 
-server.get(`/api/users/:id`, (req, res)=>{
+server.get('/api/users/:id', (req, res)=>{
     const {id} = req.params;
     db.findById(id)
     .then(user=>{
@@ -28,6 +29,39 @@ server.get(`/api/users/:id`, (req, res)=>{
     .catch(error=>{
         res.status(500).json({error: 'The user information could not be retrieved.'});
     });
+});
+
+server.post('/api/users', (req, res)=>{
+    const body = req.body;
+    if(!body.name || !body.bio){
+        res.status(400).json({errorMessage: 'Please provide name and bio for the user.'})
+    }
+    else{
+        db.insert(body)
+        .then(obj=>{
+            // TODO: Revise this
+            db.findById(obj.id)
+            .then(user=>{
+                res.status(201).json(user);
+            })
+            .catch(error=>{
+                res.status(500).json({error: 'There was an error while finding new user in database'});
+            });
+        })
+        .catch(error=>{
+            res.status(500).json({error: 'There was an error while saving the user to the database'});
+        });
+    }
+});
+
+server.put('/api/users/:id', (req, res)=>{
+    const {id} = req.params;
+    res.status(200).json({url: `/api/users/${id}`, operation: 'PUT'});
+});
+
+server.delete('/api/users/:id', (req, res)=>{
+    const {id} = req.params;
+    res.status(204).json({url: `/api/users/${id}`, operation: 'DELETE'});
 });
 
 server.listen(4000, ()=>{
