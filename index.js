@@ -31,6 +31,7 @@ server.get('/api/users/:id', (req, res)=>{
     });
 });
 
+// TODO: Thursday's lecture
 server.post('/api/users', (req, res)=>{
     const body = req.body;
     if(!body.name || !body.bio){
@@ -39,13 +40,13 @@ server.post('/api/users', (req, res)=>{
     else{
         db.insert(body)
         .then(obj=>{
-            // TODO: Revise this
+            // TODO: See if this needs revised
             db.findById(obj.id)
             .then(user=>{
                 res.status(201).json(user);
             })
             .catch(error=>{
-                res.status(500).json({error: 'There was an error while finding new user in database'});
+                res.status(404).json({error: 'There was an error while finding new user in database'});
             });
         })
         .catch(error=>{
@@ -59,9 +60,20 @@ server.put('/api/users/:id', (req, res)=>{
     res.status(200).json({url: `/api/users/${id}`, operation: 'PUT'});
 });
 
-server.delete('/api/users/:id', (req, res)=>{
+server.delete(`/api/users/:id`, (req, res)=>{
     const {id} = req.params;
-    res.status(204).json({url: `/api/users/${id}`, operation: 'DELETE'});
+    db.remove(id)
+    .then(rows=>{
+        if(!rows){
+            res.status(404).json({message: 'The user with the specified ID does not exist.'});
+        }
+        else{
+            res.status(204);
+        }
+    })
+    .catch(error=>{
+        res.status(500).json({error: 'The user could not be removed.'});
+    });
 });
 
 server.listen(4000, ()=>{
