@@ -57,6 +57,22 @@ server.post('/api/users', (req, res)=>{
 
 server.put('/api/users/:id', (req, res)=>{
     const {id} = req.params;
+    const body = req.body;
+    if(!body.name || !body.bio){
+        res.status(400).json({errorMessage: 'Please provide name and bio for the user.'});
+    }
+    else{
+        // TODO: Start here
+        db.update(id, body)
+        .then(test=>{
+            console.log(test);
+            res.status(200).json({message: 'This works just testing param value'});
+        })
+        .catch(error=>{
+            res.status(500).json({error: 'The user information could not be modified.'});
+        });
+    }
+
     res.status(200).json({url: `/api/users/${id}`, operation: 'PUT'});
 });
 
