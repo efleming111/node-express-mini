@@ -31,7 +31,6 @@ server.get('/api/users/:id', (req, res)=>{
     });
 });
 
-// TODO: Thursday's lecture
 server.post('/api/users', (req, res)=>{
     const body = req.body;
     if(!body.name || !body.bio){
@@ -40,14 +39,14 @@ server.post('/api/users', (req, res)=>{
     else{
         db.insert(body)
         .then(obj=>{
-            // TODO: See if this needs revised
             db.findById(obj.id)
             .then(user=>{
                 res.status(201).json(user);
             })
-            .catch(error=>{
-                res.status(404).json({error: 'There was an error while finding new user in database'});
-            });
+            // TODO: Don't need this here
+            // .catch(error=>{
+            //     res.status(404).json({error: 'There was an error while finding new user in database'});
+            // });
         })
         .catch(error=>{
             res.status(500).json({error: 'There was an error while saving the user to the database'});
@@ -62,18 +61,22 @@ server.put('/api/users/:id', (req, res)=>{
         res.status(400).json({errorMessage: 'Please provide name and bio for the user.'});
     }
     else{
-        // TODO: Start here
         db.update(id, body)
-        .then(test=>{
-            console.log(test);
-            res.status(200).json({message: 'This works just testing param value'});
+        .then(count=>{
+            if(count){
+                db.findById(id)
+                .then(user=>{
+                    res.status(200).json(user);
+                })
+                .catch(error=>{
+                    res.status(404).json({error: 'There was an error while finding new user in database'});
+                });
+            }
         })
         .catch(error=>{
             res.status(500).json({error: 'The user information could not be modified.'});
         });
     }
-
-    res.status(200).json({url: `/api/users/${id}`, operation: 'PUT'});
 });
 
 server.delete(`/api/users/:id`, (req, res)=>{
@@ -84,14 +87,15 @@ server.delete(`/api/users/:id`, (req, res)=>{
             res.status(404).json({message: 'The user with the specified ID does not exist.'});
         }
         else{
-            // TODO: See if this needs revised
+            // TODO: Check to see if this should return the deleted user
             db.find()
             .then(users=>{
                 res.status(200).json(users);
             })
-            .catch(error=>{
-                res.status(500).json({error: 'The users information could not be retrieved.'});
-            });
+            // TODO: Don't need this here
+            // .catch(error=>{
+            //     res.status(500).json({error: 'The users information could not be retrieved.'});
+            // });
         }
     })
     .catch(error=>{
